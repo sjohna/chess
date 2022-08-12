@@ -42,15 +42,28 @@ module.exports = {
                     },
                 ],
             },
+            {
+                test: /\.svg$/,
+                use: {
+                    loader: 'file-loader',
+                    options: {
+                        name: '[name].[ext]',
+                        outputPath: 'assets/images/'
+                    }
+                },
+                exclude: /node_modules/
+            },
         ],
     },
     plugins: [
         new CopyPlugin({
-            patterns: [{
-                from: './src/index.html',
-                to: 'index.html',
-                toType: 'file',
-            }],
+            patterns: [
+                {
+                    from: './src/index.html',
+                    to: 'index.html',
+                    toType: 'file',
+                }
+            ]
         }),
     ],
     resolve: {

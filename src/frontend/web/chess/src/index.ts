@@ -1,4 +1,5 @@
 import './style.css';
+import './resources/images/Chess_nlt45.svg'
 
 console.log("Script works!")
 
