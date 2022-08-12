@@ -1,4 +1,5 @@
 const path = require('path');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     mode: 'development',
@@ -6,16 +7,28 @@ module.exports = {
     devtool: 'inline-source-map',
     devServer: {
         static: './dist',
+        devMiddleware: {
+            writeToDisk: true,
+        }
     },
     module: {
-      rules: [
-          {
-              test: /\.tsx?$/,
-              use: 'ts-loader',
-              exclude: /node_modules/,
-          }
-      ],
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            }
+        ],
     },
+    plugins: [
+        new CopyPlugin({
+            patterns: [{
+                from: 'index.html',
+                to: 'index.html',
+                toType: 'file',
+            }],
+        }),
+    ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
