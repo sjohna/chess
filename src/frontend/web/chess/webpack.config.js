@@ -17,13 +17,37 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
-            }
+            },
+            {
+                test: /\.css$/i,
+                use: [
+                    "style-loader",
+                    "css-loader",
+                    {
+                        loader: "postcss-loader",
+                        options: {
+                            postcssOptions: {
+                                plugins: [
+                                    [
+                                        "tailwindcss",
+                                        {},
+                                    ],
+                                    [
+                                        "autoprefixer",
+                                        {},
+                                    ],
+                                ],
+                            },
+                        },
+                    },
+                ],
+            },
         ],
     },
     plugins: [
         new CopyPlugin({
             patterns: [{
-                from: 'index.html',
+                from: './src/index.html',
                 to: 'index.html',
                 toType: 'file',
             }],
