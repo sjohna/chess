@@ -18,6 +18,22 @@ export interface BoardSquare {
     pieceImage?: HTMLImageElement;
 }
 
+export interface ChessboardTheme {
+    labelledSquares: 'all' | 'first' | 'none';
+    labelColor: string;
+    lightSquareColor: string;
+    darkSquareColor: string;
+}
+
+export function defaultTheme(): ChessboardTheme {
+    return {
+        labelledSquares: 'first',
+        labelColor: 'black',
+        lightSquareColor: 'whitesmoke',
+        darkSquareColor: 'dimgray'
+    }
+}
+
 export type BoardFile = {
     [key in RankIndex]: BoardSquare;
 }
@@ -42,27 +58,53 @@ function filesReversed(): FileIndex[] {
     return ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a']
 }
 
-export function renderBoard(container: HTMLDivElement, board: Board, fromBlacksPerspective: boolean) {
+export function renderBoard(container: HTMLDivElement, board: Board, theme: ChessboardTheme, fromBlacksPerspective: boolean) {
     const rankOrder = fromBlacksPerspective ? ranks() : ranksReversed();
     const fileOrder = fromBlacksPerspective ? filesReversed() : files();
-
-    const labelledRank = rankOrder[rankOrder.length - 1];
-    const labelledFile = fileOrder[fileOrder.length - 1];
 
     for (let rank of rankOrder) {
         for (let file of fileOrder) {
             const square = board[file][rank];
-            square.div = createSquareDiv(square);
+            square.div = createSquareDiv(square, theme);
             container.append(square.div);
-            const labelDiv = document.createElement('div') as HTMLDivElement;
-            labelDiv.style.position = 'absolute';
-            labelDiv.style.top = '12px';
-            labelDiv.style.left = '12px';
-            labelDiv.style.color = 'red';
-            labelDiv.style.fontWeight = 'bold';
-            labelDiv.innerText = `${square.file}${square.rank}`;
-            square.div.append(labelDiv);
+
+            applyLabelToSquare(square, theme, fromBlacksPerspective);
         }
+    }
+}
+
+function applyLabelToSquare(square: BoardSquare, theme: ChessboardTheme, fromBlacksPerspective: boolean) {
+    if (theme.labelledSquares === 'none') {
+        return;
+    }
+
+    const labelledRank: RankIndex = fromBlacksPerspective ? 8 : 1;
+    const labelledFile: FileIndex = fromBlacksPerspective ? 'h' : 'a';
+
+    const doRankLabel = theme.labelledSquares === 'all' || square.file === labelledFile;
+    const doFileLabel = theme.labelledSquares === 'all' || square.rank === labelledRank;
+
+    if (doRankLabel) {
+        const labelDiv = document.createElement('div') as HTMLDivElement;
+        labelDiv.style.position = 'absolute';
+        labelDiv.style.top = '8px';
+        labelDiv.style.left = '12px';
+        labelDiv.style.color = theme.labelColor;
+        labelDiv.style.fontWeight = 'bold';
+        labelDiv.innerText = `${square.rank}`;
+        square.div.append(labelDiv);
+    }
+
+    if (doFileLabel) {
+        const labelDiv = document.createElement('div') as HTMLDivElement;
+        labelDiv.style.position = 'absolute';
+        // TODO: figure out these sizes...
+        labelDiv.style.top = `${square.div.clientHeight - 32}px`;
+        labelDiv.style.left = `${square.div.clientWidth - 20}px`;
+        labelDiv.style.color = theme.labelColor;
+        labelDiv.style.fontWeight = 'bold';
+        labelDiv.innerText = `${square.file}`;
+        square.div.append(labelDiv);
     }
 }
 
@@ -87,11 +129,11 @@ export function renderPiece(square: BoardSquare) {
     }
 }
 
-function createSquareDiv(square: BoardSquare): HTMLDivElement {
+function createSquareDiv(square: BoardSquare, theme: ChessboardTheme): HTMLDivElement {
     const squareDiv = document.createElement('div') as HTMLDivElement;
     squareDiv.style.width = '120px';
     squareDiv.style.height = '120px';
-    squareDiv.style.background = square.color === 'light' ? 'white' : 'black';
+    squareDiv.style.background = square.color === 'light' ? theme.lightSquareColor : theme.darkSquareColor;
     squareDiv.style.position = 'relative';
     return squareDiv;
 }
